@@ -18,8 +18,38 @@ describe('/users', ()=> {
         const res = await POST(new NextRequest('http://localhost:3000/api/users', req))
         expect(res.status).toBe(200)
         const body = await res.json()
-        expect(body.id).not.toBeUndefined()
-        expect(body.mail).toEqual('test@test.com')
-        expect(body.name).toEqual('testuser')
+        expect(body.data.id).not.toBeUndefined()
+        expect(body.data.mail).toEqual('test@test.com')
+        expect(body.data.name).toEqual('testuser')
+    })
+
+    describe('responds 422 with wrong input', () => {
+        test('No mail', async () => {
+            const user = {name: 'testuser'}
+            const req = httpMocks.createRequest<Request>({
+                method: 'POST',
+                body:  JSON.stringify(user) // TODO 
+            })
+        
+            const res = await POST(new NextRequest('http://localhost:3000/api/users', req))
+            expect(res.status).toBe(422)
+            const body = await res.json()
+            expect(body.message).toEqual('Invalid parameters')
+            expect(body.details.messages[0]).toEqual('mail is required.')
+        })
+
+        test('No name', async () => {
+            const user = {mail: 'testuser@example.com'}
+            const req = httpMocks.createRequest<Request>({
+                method: 'POST',
+                body:  JSON.stringify(user) // TODO 
+            })
+        
+            const res = await POST(new NextRequest('http://localhost:3000/api/users', req))
+            expect(res.status).toBe(422)
+            const body = await res.json()
+            expect(body.message).toEqual('Invalid parameters')
+            expect(body.details.messages[0]).toEqual('name is required.')
+        })
     })
 })
